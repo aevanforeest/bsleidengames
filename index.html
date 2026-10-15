@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+const URL_ = 'https://api.foys.io/competition/public-api/v1/matches'
+  + '?organisationId=7888965c-ba38-4acc-ac15-d6f064014b8b'
+  + '&sorting=date+asc,+startTime+asc';
+
+async function load() {
+  const status = document.getElementById('status');
+  try {
+    const r = await fetch(URL_, {
+      headers: { 'X-FederationId': '52cfa65e-9782-4a81-ab35-e2f981fcb7a9' }
+    });
+    const data = await r.json();
+    alert(data.length);
+    // out.textContent = JSON.stringify(data, null, 2);
+  } catch (e) {
+    alert("ERROR");
+    // status.textContent = 'Mislukt: ' + e.message + ' (zie de console; waarschijnlijk CORS)';
+  }
+}
+load();
+</script>
+</body>
+</html>
