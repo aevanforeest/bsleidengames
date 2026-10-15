@@ -12,12 +12,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Update matches
         run: |
-          TODAY=$(date +%F)
           curl -sS --fail \
             -H "Referer: https://basketball.nl/" \
             -H "Origin: https://basketball.nl" \
             -H "Accept: application/json" \
-            "https://api.foys.io/competition/public-api/v1/matches?startDate=2026-10-15&skipCount=0&maxResultCount=30&sorting=date+asc,+startTime+asc" \
+            -H "X-FederationId: 52cfa65e-9782-4a81-ab35-e2f981fcb7a9" \
+            "https://api.foys.io/competition/public-api/v1/matches?organisationId=7888965c-ba38-4acc-ac15-d6f064014b8b&sorting=date+asc,+startTime+asc" \
             -o matches.json
       - name: Commit if changed
         run: |
