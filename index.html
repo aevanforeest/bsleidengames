@@ -13,11 +13,11 @@ async function load() {
       headers: { 'X-FederationId': '52cfa65e-9782-4a81-ab35-e2f981fcb7a9' }
     });
     const data = await r.json();
-    alert(data.totalCount);
-    // out.textContent = JSON.stringify(data, null, 2);
+    const pre = document.createElement('pre');
+    pre.textContent = JSON.stringify(data, null, 2);
+    document.body.replaceChildren(pre);
   } catch (e) {
     alert("ERROR");
-    // status.textContent = 'Mislukt: ' + e.message + ' (zie de console; waarschijnlijk CORS)';
   }
 }
 load();
