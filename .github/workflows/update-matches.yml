@@ -17,7 +17,7 @@ jobs:
             -H "Referer: https://basketball.nl/" \
             -H "Origin: https://basketball.nl" \
             -H "Accept: application/json" \
-            "https://api.foys.io/competition/public-api/v1/matches?startDate=${TODAY}&sorting=date+asc,+startTime+asc" \
+            "https://api.foys.io/competition/public-api/v1/matches?startDate=2026-10-15&skipCount=0&maxResultCount=30&sorting=date+asc,+startTime+asc" \
             -o matches.json
       - name: Commit if changed
         run: |
