@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BS Leiden – wedstrijden dit weekend</title>
+<style>
+  :root {
+    --bg: #f3f1ec;
+    --surface: #ffffff;
+    --text: #1d2230;
+    --muted: #6a7080;
+    --line: #dcd8cf;
+    --accent: #c8102e;
+    --time-bg: #1d2230;
+    --time-fg: #ffffff;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171f;
+      --surface: #1e222d;
+      --text: #eceae4;
+      --muted: #9aa0ae;
+      --line: #313646;
+      --accent: #ff4d63;
+      --time-bg: #eceae4;
+      --time-fg: #14171f;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.4;
+    padding: 24px 16px 48px;
+  }
+  main { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 28px; }
+  h2 {
+    font-size: 1.05rem;
+    margin: 28px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--accent);
+    text-transform: capitalize;
+  }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  li.game {
+    display: grid;
+    grid-template-columns: 64px 1fr 1fr;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .time {
+    background: var(--time-bg);
+    color: var(--time-fg);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px 0;
+  }
+  .team { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .team.away { flex-direction: row-reverse; text-align: right; }
+  .logo, .logo-fallback {
+    width: 44px; height: 44px; flex: none; border-radius: 50%;
+  }
+  .logo { object-fit: contain; background: #fff; border: 1px solid var(--line); }
+  .logo-fallback {
+    display: grid; place-items: center;
+    background: var(--line); color: var(--muted); font-weight: 700; font-size: 0.8rem;
+  }
+  .names { min-width: 0; }
+  .club { font-weight: 600; overflow-wrap: anywhere; }
+  .teamname { color: var(--muted); font-size: 0.85rem; }
+  .meta { grid-column: 2 / -1; color: var(--muted); font-size: 0.82rem; }
+  .meta .cancelled { color: var(--accent); font-weight: 700; }
+  .meta .score { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .game.is-cancelled .club, .game.is-cancelled .teamname { text-decoration: line-through; }
+  #status { color: var(--muted); }
+  #status.error { color: var(--accent); }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  @media (max-width: 560px) {
+    li.game { grid-template-columns: 56px 1fr; }
+    .team.away { flex-direction: row; text-align: left; }
+    .meta { grid-column: 2; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Wedstrijden dit weekend</h1>
+  <p class="sub" id="range"></p>
+  <p id="status" role="status">Laden…</p>
+  <div id="games"></div>
+</main>
+
+<script>
+const ORG_ID = '7888965c-ba38-4acc-ac15-d6f064014b8b';
+const FEDERATION_ID = '52cfa65e-9782-4a81-ab35-e2f981fcb7a9';
+const TZ = 'Europe/Amsterdam';
+
+/* ---------- date helpers (all dates are plain "YYYY-MM-DD" strings) ---------- */
+function todayInAmsterdam() {
+  // en-CA gives YYYY-MM-DD
+  return new Date().toLocaleDateString('en-CA', { timeZone: TZ });
+}
+function addDays(iso, n) {
+  const d = new Date(iso + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+// Saturday + Sunday of the current weekend (if today is Sat/Sun)
+// or of the upcoming one (Mon–Fri).
+function weekendFor(todayIso) {
+  const dow = new Date(todayIso + 'T00:00:00Z').getUTCDay(); // 0 = Sun … 6 = Sat
+  const saturday = dow === 0 ? addDays(todayIso, -1) : addDays(todayIso, 6 - dow);
+  return { saturday, sunday: addDays(saturday, 1) };
+}
+function formatDay(iso) {
+  return new Date(iso + 'T12:00:00Z').toLocaleDateString('nl-NL', {
+    weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC'
+  });
+}
+
+/* ---------- data ---------- */
+function apiUrl(startDate) {
+  return 'https://api.foys.io/competition/public-api/v1/matches'
+    + '?startDate=' + startDate
+    + '&skipCoubt=0&maxResultCount=1000'
+    + '&organisationId=' + ORG_ID
+    + '&sorting=date+asc,+startTime+asc';
+}
+
+function el(tag, className, text) {
+  const e = document.createElement(tag);
+  if (className) e.className = className;
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+function initials(name) {
+  return (name || '?').split(/\s+/).map(w => w[0]).join('').slice(0, 3).toUpperCase();
+}
+
+function teamBlock(side, clubName, teamName, logoUrl) {
+  const t = el('div', 'team ' + side);
+  if (logoUrl) {
+    const img = el('img', 'logo');
+    img.src = logoUrl;
+    img.alt = '';
+    img.loading = 'lazy';
+    img.onerror = () => img.replaceWith(el('div', 'logo-fallback', initials(clubName)));
+    t.append(img);
+  } else {
+    t.append(el('div', 'logo-fallback', initials(clubName)));
+  }
+  const names = el('div', 'names');
+  names.append(el('div', 'club', clubName || 'Onbekend'));
+  if (teamName) names.append(el('div', 'teamname', teamName));
+  t.append(names);
+  return t;
+}
+
+function gameRow(m) {
+  const cancelled = m.status === 'Cancelled';
+  const li = el('li', 'game' + (cancelled ? ' is-cancelled' : ''));
+  li.append(el('div', 'time', (m.startTime || '').slice(0, 5) || '–'));
+  li.append(teamBlock('home', m.homeOrganisation && m.homeOrganisation.name, m.homeTeamName, m.homeLogoUrl));
+  li.append(teamBlock('away', m.awayOrganisation && m.awayOrganisation.name, m.awayTeamName, m.awayLogoUrl));
+
+  const meta = el('div', 'meta');
+  const bits = [];
+  if (cancelled) {
+    const c = el('span', 'cancelled', 'Afgelast');
+    bits.push(c);
+  } else if (m.homeScore != null && m.awayScore != null) {
+    bits.push(el('span', 'score', m.homeScore + ' – ' + m.awayScore));
+  }
+  const place = m.accommodationName || (m.accommodation && m.accommodation.name);
+  if (place) bits.push(document.createTextNode(place));
+  bits.forEach((b, i) => {
+    if (i) meta.append(document.createTextNode(' · '));
+    meta.append(b);
+  });
+  if (bits.length) li.append(meta);
+  return li;
+}
+
+function render(items, weekend) {
+  const status = document.getElementById('status');
+  const container = document.getElementById('games');
+  container.replaceChildren();
+
+  const days = [weekend.saturday, weekend.sunday];
+  const games = items
+    .filter(m => days.includes((m.date || '').slice(0, 10)))
+    .sort((a, b) =>
+      (a.date || '').localeCompare(b.date || '') ||
+      (a.startTime || '').localeCompare(b.startTime || ''));
+
+  if (!games.length) {
+    status.textContent = 'Geen wedstrijden gevonden dit weekend.';
+    return;
+  }
+  status.textContent = '';
+
+  for (const day of days) {
+    const dayGames = games.filter(m => m.date.slice(0, 10) === day);
+    if (!dayGames.length) continue;
+    container.append(el('h2', null, formatDay(day)));
+    const ul = el('ul');
+    dayGames.forEach(m => ul.append(gameRow(m)));
+    container.append(ul);
+  }
+}
+
+async function load() {
+  const status = document.getElementById('status');
+  const weekend = weekendFor(todayInAmsterdam());
+  document.getElementById('range').textContent =
+    formatDay(weekend.saturday) + ' en ' + formatDay(weekend.sunday);
+  try {
+    const r = await fetch(apiUrl(weekend.saturday), {
+      headers: { 'X-FederationId': FEDERATION_ID }
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    render(data.items || [], weekend);
+  } catch (e) {
+    status.className = 'error';
+    status.textContent = 'De wedstrijden konden niet worden geladen (' + e.message + ').';
+  }
+}
+load();
+</script>
+</body>
+</html>
