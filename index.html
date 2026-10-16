@@ -1,19 +1,39 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>BS Leiden Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
 <style>
+  body {
+    font-family: system-ui, sans-serif;
+    color: #212529;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 2rem;
+  }
+  main {
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+  canvas {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
 </style>
 </head>
 <body>
 <main>
-  <p id="status"></p>
-  <div id="games"></div>
+  <canvas id="saturdayHomeGames" width="1080" height="1350"></canvas>
 </main>
 
 <script>
+const json = {"totalCount":431,"items":[{"competition":{"position":217,"disciplineId":47,"matchCategoryIds":[292],"id":6018,"name":"Vrouwen U21 (Basketball Cup) - Groepsfase"},"date":"2026-10-16T00:00:00Z","startTime":"20:30:00","status":"Planned","fieldName":"Veld 2","accommodation":{"id":"4d2e09fb-aeeb-44ae-ba06-fe2f38c3d6b1","name":"Sportzaal Houtkwartier"},"accommodationName":"Sportzaal Houtkwartier","homeTeamId":50075,"awayTeamId":49827,"homeTeamGuid":"d684ba75-56f3-466a-9e37-ef300759f904","awayTeamGuid":"e12e6061-bff0-42c8-9fe2-f79e404515aa","homeScore":null,"awayScore":null,"homeTeamName":"V21-1","awayTeamName":"V21-1","homeTeamLockerRoom":"6","awayTeamLockerRoom":"7","homeLogoUrl":"https://images.foys.io/foys/7888965c-ba38-4acc-ac15-d6f064014b8b/FD2155A87DE182D6D374CECD4057026A.gif?w=200","awayLogoUrl":"https://images.foys.io/foys/01e192b2-0182-4647-b83e-17254d484862/5938BA9E7A7AEB916F214EDA2F4E0185.gif?w=200","homeOrganisation":{"id":"7888965c-ba38-4acc-ac15-d6f064014b8b","name":"BS Leiden"},"homeTeamSponsorClubName":"BS Leiden","awayOrganisation":{"id":"01e192b2-0182-4647-b83e-17254d484862","name":"Jolly Jumpers"},"awayTeamSponsorClubName":null,"address":{"address1":"Vennemeerstraat","address2":null,"houseNumber":"1","houseNumberExtension":null,"zipCode":"2334DE","country":"nl","latitude":52.172357,"longitude":4.485234,"city":"LEIDEN","locationName":"Sporthaladres"},"isConfirmed":false,"isOpenForDMF":true,"isFriendly":false,"myAvailabilityStatus":null,"isTeamMember":false,"isMatchOfficial":false,"id":512902},{"competition":{"position":20,"disciplineId":47,"matchCategoryIds":[231],"id":5866,"name":"Mannen Senioren Regionaal - 5e divisie"},"date":"2026-10-17T00:00:00Z","startTime":"12:00:00","status":"Planned","fieldName":"Center Court","accommodation":{"id":"f65e26a1-8f08-4117-8f3a-b433f629ab2e","name":"Sosefhal"},"accommodationName":"Sosefhal","homeTeamId":48660,"awayTeamId":52039,"homeTeamGuid":"a91e9dd1-0967-4a13-b488-92fdd0d6a58f","awayTeamGuid":"45971632-048d-42d0-900c-ab84ac38d6e1","homeScore":null,"awayScore":null,"homeTeamName":"MSE-3","awayTeamName":"MSE-5","homeTeamLockerRoom":null,"awayTeamLockerRoom":null,"homeLogoUrl":"https://images.foys.io/foys/9054a7ff-3323-49f4-9e51-8b1d44496ae0/0622EF61CC60AF9DABAA2874D124D727.gif?w=200","awayLogoUrl":"https://images.foys.io/foys/7888965c-ba38-4acc-ac15-d6f064014b8b/FD2155A87DE182D6D374CECD4057026A.gif?w=200","homeOrganisation":{"id":"9054a7ff-3323-49f4-9e51-8b1d44496ae0","name":"Westland Stars"},"homeTeamSponsorClubName":null,"awayOrganisation":{"id":"7888965c-ba38-4acc-ac15-d6f064014b8b","name":"BS Leiden"},"awayTeamSponsorClubName":null,"address":{"address1":"Strijphorst","address2":null,"houseNumber":"1","houseNumberExtension":null,"zipCode":"2675WN","country":"nl","latitude":52.0025436175691,"longitude":4.23079864939825,"city":"HONSELERSDIJK","locationName":"Sporthaladres"},"isConfirmed":false,"isOpenForDMF":true,"isFriendly":false,"myAvailabilityStatus":null,"isTeamMember":false,"isMatchOfficial":false,"id":511356},{"competition":{"position":377,"disciplineId":47,"matchCategoryIds":[241],"id":5974,"name":"Mannen U16 (Basketball Cup) - 1e ronde"},"date":"2026-10-17T00:00:00Z","startTime":"12:30:00","status":"Planned","fieldName":"Veld 2","accommodation":{"id":"4d2e09fb-aeeb-44ae-ba06-fe2f38c3d6b1","name":"Sportzaal Houtkwartier"},"accommodationName":"Sportzaal Houtkwartier","homeTeamId":48651,"awayTeamId":47365,"homeTeamGuid":"f72b842d-772c-4279-b60e-ed21ee633d4a","awayTeamGuid":"de7df98a-5bdb-405d-b0a2-2b0f091c821e","homeScore":null,"awayScore":null,"homeTeamName":"M16-2","awayTeamName":"M16-1","homeTeamLockerRoom":"6","awayTeamLockerRoom":"7","homeLogoUrl":"https://images.foys.io/foys/7888965c-ba38-4acc-ac15-d6f064014b8b/FD2155A87DE182D6D374CECD4057026A.gif?w=200","awayLogoUrl":"https://images.foys.io/foys/2aad2642-4ac6-495a-bbd9-5f46bfd51123/8B6238871B732DB094793D52268C0C40.gif?w=200","homeOrganisation":{"id":"7888965c-ba38-4acc-ac15-d6f064014b8b","name":"BS Leiden"},"homeTeamSponsorClubName":null,"awayOrganisation":{"id":"2aad2642-4ac6-495a-bbd9-5f46bfd51123","name":"Tracks Parkstad"},"awayTeamSponsorClubName":null,"address":{"address1":"Vennemeerstraat","address2":null,"houseNumber":"1","houseNumberExtension":null,"zipCode":"2334DE","country":"nl","latitude":52.172357,"longitude":4.485234,"city":"LEIDEN","locationName":"Sporthaladres"},"isConfirmed":false,"isOpenForDMF":true,"isFriendly":false,"myAvailabilityStatus":null,"isTeamMember":false,"isMatchOfficial":false,"id":516818},{"competition":{"position":282,"disciplineId":47,"matchCategoryIds":[239],"id":5884,"name":"Mannen U18 Regionaal 1e Helft Competitie - 3e divisie"},"date":"2026-10-17T00:00:00Z","startTime":"15:00:00","status":"Planned","fieldName":"Veld 1","accommodation":{"id":"92ce35d1-529e-423f-b103-8ca8b6f8678d","name":"De Duikelaar"},"accommodationName":"De Duikelaar","homeTeamId":48499,"awayTeamId":48821,"homeTeamGuid":"3306f667-69f6-4e5f-8f78-6d2f908d47cf","awayTeamGuid":"a6b5ed1e-8bf4-4b28-b345-6b63ed4b8528","homeScore":null,"awayScore":null,"homeTeamName":"M18-1","awayTeamName":"M18-1","homeTeamLockerRoom":null,"awayTeamLockerRoom":null,"homeLogoUrl":"https://images.foys.io/foys/3eaa9192-b179-45a6-ad71-fd5da0f691cc/ceec76d3-df06-4f3b-bec0-2ee50064c2a0.png?w=200","awayLogoUrl":"https://images.foys.io/foys/7888965c-ba38-4acc-ac15-d6f064014b8b/FD2155A87DE182D6D374CECD4057026A.gif?w=200","homeOrganisation":{"id":"3eaa9192-b179-45a6-ad71-fd5da0f691cc","name":"Bouncers Basketball"},"homeTeamSponsorClubName":null,"awayOrganisation":{"id":"7888965c-ba38-4acc-ac15-d6f064014b8b","name":"BS Leiden"},"awayTeamSponsorClubName":null,"address":{"address1":"Zuidplaslaan","address2":null,"houseNumber":"550","houseNumberExtension":null,"zipCode":"2743CT","country":"nl","latitude":52.0372628746016,"longitude":4.63575600563411,"city":"WADDINXVEEN","locationName":"Sporthaladres"},"isConfirmed":false,"isOpenForDMF":true,"isFriendly":false,"myAvailabilityStatus":null,"isTeamMember":false,"isMatchOfficial":false,"id":501268},{"competition":{"position":268,"disciplineId":47,"matchCategoryIds":[291],"id":5976,"name":"Mannen U19 (Basketball Cup) - 1e ronde"},"date":"2026-10-17T00:00:00Z","startTime":"15:00:00","status":"Planned","fieldName":"Veld 2","accommodation":{"id":"4d2e09fb-aeeb-44ae-ba06-fe2f38c3d6b1","name":"Sportzaal Houtkwartier"},"accommodationName":"Sportzaal Houtkwartier","homeTeamId":48814,"awayTeamId":49388,"homeTeamGuid":"307b747d-6b28-42b7-a737-e8689b9d922f","awayTeamGuid":"ce51e0fc-0c7f-4d6a-818b-418d5858fd1a","homeScore":null,"awayScore":null,"homeTeamName":"M19-2","awayTeamName":"M19-1","homeTeamLockerRoom":"5","awayTeamLockerRoom":"8","homeLogoUrl":"https://images.foys.io/foys/7888965c-ba38-4acc-ac15-d6f064014b8b/FD2155A87DE182D6D374CECD4057026A.gif?w=200","awayLogoUrl":"https://images.foys.io/foys/e437b172-5ec4-43a2-960d-addf3e191e29/8aed6f23-067a-4a52-9fdd-fb9a549bf93b.png?w=200","homeOrganisation":{"id":"7888965c-ba38-4acc-ac15-d6f064014b8b","name":"BS Leiden"},"homeTeamSponsorClubName":null,"awayOrganisation":{"id":"e437b172-5ec4-43a2-960d-addf3e191e29","name":"GET United"},"awayTeamSponsorClubName":null,"address":{"address1":"Vennemeerstraat","address2":null,"houseNumber":"1","houseNumberExtension":null,"zipCode":"2334DE","country":"nl","latitude":52.172357,"longitude":4.485234,"city":"LEIDEN","locationName":"Sporthaladres"},"isConfirmed":false,"isOpenForDMF":true,"isFriendly":false,"myAvailabilityStatus":null,"isTeamMember":false,"isMatchOfficial":false,"id":516829},{"competition":{"position":182,"disciplineId":47,"matchCategoryIds":[235],"id":6038,"name":"Mannen U22 (Basketball Cup) - 1e ronde"},"date":"2026-10-17T00:00:00Z","startTime":"17:15:00","status":"Planned","fieldName":"Veld 1","accommodation":{"id":"ac3488a1-3a47-4a63-bf70-6d1498187dbe","name":"Interwey"},"accommodationName":"Interwey","homeTeamId":52282,"awayTeamId":47318,"homeTeamGuid":"bc960996-47b0-4bae-a28a-07ecdbc5ed36","awayTeamGuid":"b64e1e20-6c88-429d-afe1-bd073d01ee1a","homeScore":null,"awayScore":null,"homeTeamName":"M22-1","awayTeamName":"M22-1","homeTeamLockerRoom":null,"awayTeamLockerRoom":null,"homeLogoUrl":"https://images.foys.io/foys/0993d5a5-e0ca-4bf9-b549-45ad5c1a69e1/DC3BF5E94CD396F03F2022E1242974F6.gif?w=200","awayLogoUrl":"https://images.foys.io/foys/7888965c-ba38-4acc-ac15-d6f064014b8b/FD2155A87DE182D6D374CECD4057026A.gif?w=200","homeOrganisation":{"id":"0993d5a5-e0ca-4bf9-b549-45ad5c1a69e1","name":"Archipel"},"homeTeamSponsorClubName":null,"awayOrganisation":{"id":"7888965c-ba38-4acc-ac15-d6f064014b8b","name":"BS Leiden"},"awayTeamSponsorClubName":null,"address":{"address1":"Sportlaan","address2":null,"houseNumber":"1","houseNumberExtension":null,"zipCode":"4102HM","country":"nl","latitude":51.9497818571467,"longitude":5.24764090099715,"city":"CULEMBORG","locationName":"Sporthaladres"},"isConfirmed":false,"isOpenForDMF":true,"isFriendly":false,"myAvailabilityStatus":null,"isTeamMember":false,"isMatchOfficial":false,"id":516843},{"competition":{"position":42,"disciplineId":47,"matchCategoryIds":[231],"id":5999,"name":"Mannen Senioren (Basketball Cup) - 1e Ronde"},"date":"2026-10-17T00:00:00Z","startTime":"17:30:00","status":"Planned","fieldName":"Veld 2","accommodation":{"id":"4d2e09fb-aeeb-44ae-ba06-fe2f38c3d6b1","name":"Sportzaal Houtkwartier"},"accommodationName":"Sportzaal Houtkwartier","homeTeamId":47551,"awayTeamId":48992,"homeTeamGuid":"af6997d7-1a57-4d9f-bd2d-2a6999dae002","awayTeamGuid":"515b838e-c5c1-4670-8f71-47b25b0803d3","homeScore":null,"awayScore":null,"homeTeamName":"MSE-3","awayTeamName":"MSE-1","homeTeamLockerRoom":"6","awayTeamLockerRoom":"7","homeLogoUrl":"https://images.foys.io/foys/7888965c-ba38-4acc-ac15-d6f064014b8b/FD2155A87DE182D6D374CECD4057026A.gif?w=200","awayLogoUrl":"https://images.foys.io/foys/b0f50d37-5b0e-4dae-bd1f-48d5b3df47ff/647457A6021F6B5D7F0DF5333FF4D41C.gif?w=200","homeOrganisation":{"id":"7888965c-ba38-4acc-ac15-d6f064014b8b","name":"BS Leiden"},"homeTeamSponsorClubName":null,"awayOrganisation":{"id":"b0f50d37-5b0e-4dae-bd1f-48d5b3df47ff","name":"Lokomotief"},"awayTeamSponsorClubName":null,"address":{"address1":"Vennemeerstraat","address2":null,"houseNumber":"1","houseNumberExtension":null,"zipCode":"2334DE","country":"nl","latitude":52.172357,"longitude":4.485234,"city":"LEIDEN","locationName":"Sporthaladres"},"isConfirmed":false,"isOpenForDMF":true,"isFriendly":false,"myAvailabilityStatus":null,"isTeamMember":false,"isMatchOfficial":false,"id":516871},{"competition":{"position":62,"disciplineId":47,"matchCategoryIds":[232],"id":5811,"name":"Vrouwen Senioren Landelijk - Women's Basketball League"},"date":"2026-10-17T00:00:00Z","startTime":"18:15:00","status":"Planned","fieldName":"Center Court","accommodation":{"id":"922cbc9a-7bf3-47cf-92e2-00399ac3395e","name":"De Driesprong"},"accommodationName":"De Driesprong","homeTeamId":49338,"awayTeamId":48480,"homeTeamGuid":"c621181c-2713-4746-a66c-b26ab3f5e33d","awayTeamGuid":"cab24907-b6ab-408f-b84c-b75241f03c47","homeScore":null,"awayScore":null,"homeTeamName":"VSE-1","awayTeamName":"VSE-1","homeTeamLockerRoom":null,"awayTeamLockerRoom":null,"homeLogoUrl":"https://images.foys.io/foys/b04e7f26-b149-4956-9939-3c939263475c/A1461E4AB76DDEA53D800E058FCC52C2.gif?w=200","awayLogoUrl":"https://images.foys.io/foys/7888965c-ba38-4acc-ac15-d6f064014b8b/FD2155A87DE182D6D374CECD4057026A.gif?w=200","homeOrganisation":{"id":"b04e7f26-b149-4956-9939-3c939263475c","name":"CBV Binnenland"},"homeTeamSponsorClubName":"Startportaal-Renza Airflow Binnenland","awayOrganisation":{"id":"7888965c-ba38-4acc-ac15-d6f064014b8b","name":"BS Leiden"},"awayTeamSponsorClubName":"Zorg en Zekerheid","address":{"address1":"Marijkesingel","address2":null,"houseNumber":"20","houseNumberExtension":null,"zipCode":"2991BK","country":"nl","latitude":51.8504651606951,"longitude":4.54861089273036,"city":"BARENDRECHT","locationName":"Sporthaladres"},"isConfirmed":false,"isOpenForDMF":true,"isFriendly":false,"myAvailabilityStatus":null,"isTeamMember":false,"isMatchOfficial":false,"id":506392},{"competition":{"position":42,"disciplineId":47,"matchCategoryIds":[231],"id":5999,"name":"Mannen Senioren (Basketball Cup) - 1e Ronde"},"date":"2026-10-17T00:00:00Z","startTime":"19:30:00","status":"Planned","fieldName":"Centercourt","accommodation":{"id":"7324df77-a59a-4e25-9953-8770c8f6895e","name":"Zwijsen"},"accommodationName":"Zwijsen","homeTeamId":47766,"awayTeamId":47544,"homeTeamGuid":"16734bd6-7474-4046-817c-e97d5eb9a4ad","awayTeamGuid":"529d341f-6de7-4920-8e32-dbc23ac4643d","homeScore":null,"awayScore":null,"homeTeamName":"MSE-1","awayTeamName":"MSE-2","homeTeamLockerRoom":null,"awayTeamLockerRoom":null,"homeLogoUrl":"https://images.foys.io/foys/3270a1b8-f623-4967-ad40-0f6b931ba15d/819EDBA138A3CE5EFEDDDC8911F92F51.gif?w=200","awayLogoUrl":"https://images.foys.io/foys/7888965c-ba38-4acc-ac15-d6f064014b8b/FD2155A87DE182D6D374CECD4057026A.gif?w=200","homeOrganisation":{"id":"3270a1b8-f623-4967-ad40-0f6b931ba15d","name":"Attacus"},"homeTeamSponsorClubName":"","awayOrganisation":{"id":"7888965c-ba38-4acc-ac15-d6f064014b8b","name":"BS Leiden"},"awayTeamSponsorClubName":"Zorg en Zekerheid","address":{"address1":"Pr W Alexander Sportprk","address2":null,"houseNumber":"15","houseNumberExtension":null,"zipCode":"5461XL","country":"nl","latitude":51.6264918562723,"longitude":5.54037096811819,"city":"VEGHEL","locationName":"Sporthaladres"},"isConfirmed":false,"isOpenForDMF":true,"isFriendly":false,"myAvailabilityStatus":null,"isTeamMember":false,"isMatchOfficial":false,"id":516872},{"competition":{"position":96,"disciplineId":47,"matchCategoryIds":[232],"id":6021,"name":"Vrouwen Senioren (Basketball Cup) - 1e ronde"},"date":"2026-10-17T00:00:00Z","startTime":"20:00:00","status":"Planned","fieldName":"Veld 1","accommodation":{"id":"4e63132e-90d1-47cc-8255-0a929677b823","name":"Sporthal Carla de Liefde"},"accommodationName":"Sporthal Carla de Liefde","homeTeamId":49833,"awayTeamId":47408,"homeTeamGuid":"3c4a372d-af29-4c25-97dd-ad4f25759e63","awayTeamGuid":"431d8d28-8526-4a3d-9088-a1eacfab4f51","homeScore":null,"awayScore":null,"homeTeamName":"VSE-1","awayTeamName":"VSE-2","homeTeamLockerRoom":null,"awayTeamLockerRoom":null,"homeLogoUrl":"https://images.foys.io/foys/aa861ced-c626-48bd-a128-e14e7f5f614d/0ae10bc3-986e-47e7-b995-3f1d43f6d82c.png?w=200","awayLogoUrl":"https://images.foys.io/foys/7888965c-ba38-4acc-ac15-d6f064014b8b/FD2155A87DE182D6D374CECD4057026A.gif?w=200","homeOrganisation":{"id":"aa861ced-c626-48bd-a128-e14e7f5f614d","name":"B.O.B."},"homeTeamSponsorClubName":null,"awayOrganisation":{"id":"7888965c-ba38-4acc-ac15-d6f064014b8b","name":"BS Leiden"},"awayTeamSponsorClubName":null,"address":{"address1":"Polderlaan","address2":null,"houseNumber":"4","houseNumberExtension":null,"zipCode":"3261ZA","country":"nl","latitude":51.8108694583828,"longitude":4.43310789163865,"city":"OUD-BEIJERLAND","locationName":"Sporthaladres"},"isConfirmed":false,"isOpenForDMF":true,"isFriendly":false,"myAvailabilityStatus":null,"isTeamMember":false,"isMatchOfficial":false,"id":516808}]};
+
 const ORG_ID = '7888965c-ba38-4acc-ac15-d6f064014b8b';
 const FED_ID = '52cfa65e-9782-4a81-ab35-e2f981fcb7a9';
 
@@ -39,42 +59,105 @@ function getUrl(startDate) {
     + '&sorting=date+asc,+startTime+asc';
 }
 
-function renderGame(item) {
-  const pre = document.createElement('pre');
-  return pre;
+function loadImage(url) {
+  return new Promise((resolve) => {
+    if (!url) { resolve(null); return; }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
 }
 
-function renderGames(items, startOfWeek) {
-  const games = document.getElementById('games');
-  if (items.length == 0) {
-    games.textContent = 'No games';
+async function renderCanvas(canvasId, games) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+
+  await document.fonts.load('40px "Bebas Neue"');
+
+  if (games.length === 0) {
+    ctx.fillStyle = '#212529';
+    ctx.font = '40px "Bebas Neue", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Geen wedstrijden', canvas.width / 2, canvas.height / 2);
     return;
   }
 
-  items.forEach(item => games.append(renderGame(item)))
+  const rowWidth = 960;
+  const rowHeight = 110;
+
+  const rowX = (canvas.width - rowWidth) / 2;
+  let rowY = 200;
+
+  for (const game of games) {
+    const homeLogo = await loadImage(game.homeLogoUrl);
+    const awayLogo = await loadImage(game.awayLogoUrl);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
+    ctx.shadowOffsetY = 4;
+    ctx.fillRect(rowX, rowY, rowWidth, rowHeight);
+
+    ctx.fillStyle = '#212529';
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = '';
+    ctx.shadowOffsetY = 0;
+
+    if (homeLogo) {
+      ctx.drawImage(homeLogo, rowX + 60, rowY + (rowHeight - 48) / 2, 48, 48);
+    }
+    ctx.font = '32px "Bebas Neue", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(game.homeOrganisation?.name || '', rowX + 120, rowY + 45);
+    ctx.font = '32px "Bebas Neue", sans-serif';
+    ctx.fillText(game.homeTeamName || '', rowX + 120, rowY + 70);
+
+    const timeStr = game.startTime ? game.startTime.substring(0, 5) : '';
+    ctx.font = '64px "Bebas Neue", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(timeStr, canvas.width / 2, rowY + 72);
+
+    if (awayLogo) {
+      ctx.drawImage(awayLogo, rowX + rowWidth - 60, rowY + (rowHeight - 48) / 2, 48, 48);
+    }
+    ctx.font = '32px "Bebas Neue", sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(game.awayOrganisation?.name || '', rowX + rowWidth - 120, rowY + 45);
+    ctx.font = '32px "Bebas Neue", sans-serif';
+    ctx.fillText(game.awayTeamName || '', rowX + rowWidth - 120, rowY + 70);
+
+    rowY += rowHeight + 20;
+  }
+}
+
+async function renderGames(games) {
+  if (!games || games.length == 0) {
+   return;
+  }
+
+  const saturdayHomeGames = games.filter(m => m.date.startsWith('2026-10-17') && m.homeOrganisation?.id == ORG_ID);
+  await renderCanvas('saturdayHomeGames', saturdayHomeGames);
 }
 
 async function load() {
-  const status = document.getElementById('status');
   const startOfWeek = getStartOfWeek()
-  status.textContent = 'Loading...';
+  renderGames(json.items || [], startOfWeek);
+/*
   try {
     const r = await fetch(getUrl(startOfWeek), {
       headers: { 'X-FederationId': FED_ID }
     });
     if (!r.ok) throw new Error('HTTP ' + r.status);
 
-    const text = await r.text();
-    const pre = document.createElement('pre');
-    pre.textContent = text
-    const games = document.getElementById('games');
-    games.appendChild(pre);
-//    const json = await r.json();
-//    status.textContent = 'Loaded';
-//    render(data.items || [], startOfWeek);
+    const json = await r.json();
+    status.textContent = 'Loaded';
+    render(json.items || [], startOfWeek);
   } catch (e) {
     status.textContent = 'Error: ' + e.message;
   }
+*/
 }
 load();
 </script>
