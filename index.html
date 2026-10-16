@@ -24,7 +24,7 @@ function getStartOfWeek() {
   date.setDate(date.getDate() - diff);
   return date;
 }
-
+  
 function formatDate(date) {
   const year = String(date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -39,20 +39,19 @@ function getUrl(startDate) {
     + '&sorting=date+asc,+startTime+asc';
 }
 
-function render(items, startOfWeek) {
+function renderGame(item) {
+  const pre = document.createELement('pre');
+  return pre;
+}
+
+function renderGames(items, startOfWeek) {
   const games = document.getElementById('games');
   if (items.length == 0) {
     games.textContent = 'No games';
     return;
   }
 
-  games.innerHTML = items.map(match => `
-    <div style="border: 1px solid #ddd; padding: 12px; margin-bottom: 10px; border-radius: 6px; font-family: system-ui, sans-serif;">
-      <div><strong>Datum:</strong> ${match.date ? match.date.split('T')[0] : ''} &nbsp;|&nbsp; <strong>Tijd:</strong> ${match.startTime || ''} &nbsp;|&nbsp; <strong>Status:</strong> ${match.status || ''}</div>
-      <div><strong>Thuis:</strong> ${match.homeOrganisation?.name || ''} (${match.homeTeamName || ''})</div>
-      <div><strong>Uit:</strong> ${match.awayOrganisation?.name || ''} (${match.awayTeamName || ''})</div>
-    </div>
-  `).join('');
+  items.forEach(item => games.append(renderGame(item))
 }
 
 async function load() {
@@ -65,9 +64,14 @@ async function load() {
     });
     if (!r.ok) throw new Error('HTTP ' + r.status);
 
-    const json = await r.json();
-    status.textContent = 'Loaded';
-    render(data.items || [], startOfWeek);
+    const text = await r.text();
+    const pre = document.createElement('pre');
+    pre.textContent = text
+    const games = document.getElementById('games');
+    games.appendChild(pre);
+//    const json = await r.json();
+//    status.textContent = 'Loaded';
+//    render(data.items || [], startOfWeek);
   } catch (e) {
     status.textContent = 'Error: ' + e.message;
   }
