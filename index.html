@@ -52,6 +52,7 @@ function formatDate(date) {
 function getUrl(startDate) {
   return 'https://api.foys.io/competition/public-api/v1/matches'
     + '?startDate=' + formatDate(startDate)
+    + '&skipCount=0&maxResultCount=300'
     + '&organisationId=' + ORG_ID
     + '&sorting=date+asc,+startTime+asc';
 }
