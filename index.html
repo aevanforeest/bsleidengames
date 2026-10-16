@@ -17,7 +17,7 @@
 const ORG_ID = '7888965c-ba38-4acc-ac15-d6f064014b8b';
 const FED_ID = '52cfa65e-9782-4a81-ab35-e2f981fcb7a9';
 
-function getMonday() {
+function getStartOfWeek() {
   const date = new Date();
   const day = date.getDay();
   const diff = (day === 0 ? 6 : day - 1);  
@@ -26,7 +26,7 @@ function getMonday() {
 }
 
 function formatDate(date) {
-  const year = date.getFullYear();
+  const year = String(date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const dayOfMonth = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${dayOfMonth}`;
@@ -35,86 +35,40 @@ function formatDate(date) {
 function getUrl(startDate) {
   return 'https://api.foys.io/competition/public-api/v1/matches'
     + '?startDate=' + formatDate(startDate)
-    + '&skipCount=0&maxResultCount=30'
     + '&organisationId=' + ORG_ID
     + '&sorting=date+asc,+startTime+asc';
 }
-/*
-function gameRow(m) {
-  const cancelled = m.status === 'Cancelled';
-  const li = el('li', 'game' + (cancelled ? ' is-cancelled' : ''));
-  li.append(el('div', 'time', (m.startTime || '').slice(0, 5) || '–'));
-  li.append(teamBlock('home', m.homeOrganisation && m.homeOrganisation.name, m.homeTeamName, m.homeLogoUrl));
-  li.append(teamBlock('away', m.awayOrganisation && m.awayOrganisation.name, m.awayTeamName, m.awayLogoUrl));
 
-  const meta = el('div', 'meta');
-  const bits = [];
-  if (cancelled) {
-    const c = el('span', 'cancelled', 'Afgelast');
-    bits.push(c);
-  } else if (m.homeScore != null && m.awayScore != null) {
-    bits.push(el('span', 'score', m.homeScore + ' – ' + m.awayScore));
-  }
-  const place = m.accommodationName || (m.accommodation && m.accommodation.name);
-  if (place) bits.push(document.createTextNode(place));
-  bits.forEach((b, i) => {
-    if (i) meta.append(document.createTextNode(' · '));
-    meta.append(b);
-  });
-  if (bits.length) li.append(meta);
-  return li;
-}
-
-function render(items, startDate) {
-  const status = document.getElementById('status');
-  const container = document.getElementById('games');
-  container.replaceChildren();
-
-  const days = [weekend.saturday, weekend.sunday];
-  const games = items
-    .filter(m => days.includes((m.date || '').slice(0, 10)))
-    .sort((a, b) =>
-      (a.date || '').localeCompare(b.date || '') ||
-      (a.startTime || '').localeCompare(b.startTime || ''));
-
-  if (!games.length) {
-    status.textContent = 'Geen wedstrijden gevonden dit weekend.';
+function render(items, startOfWeek) {
+  const games = document.getElementById('games');
+  if (items.length == 0) {
+    games.textContent = 'No games';
     return;
   }
-  status.textContent = '';
 
-  for (const day of days) {
-    const dayGames = games.filter(m => m.date.slice(0, 10) === day);
-    if (!dayGames.length) continue;
-    container.append(el('h2', null, formatDay(day)));
-    const ul = el('ul');
-    dayGames.forEach(m => ul.append(gameRow(m)));
-    container.append(ul);
-  }
+games.innerHTML = items.map(match => `
+    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
+      <div><strong>Datum:</strong> ${match.date.split('T')[0]} om ${match.startTime}</div>
+      <div><strong>Competitie:</strong> ${match.competition.name}</div>
+      <div><strong>Teams:</strong> ${match.homeTeamName} vs ${match.awayTeamName}</div>
+      <div><strong>Locatie:</strong> ${match.accommodationName} (${match.fieldName})</div>
+    </div>
+  `).join('');
 }
-*/
+
 async function load() {
   const status = document.getElementById('status');
-  const monday = getMonday()
+  const startOfWeek = getStartOfWeek()
   status.textContent = 'Loading...';
   try {
-    const r = await fetch(getUrl(monday), {
+    const r = await fetch(getUrl(startOfWeek), {
       headers: { 'X-FederationId': FED_ID }
     });
     if (!r.ok) throw new Error('HTTP ' + r.status);
 
-    // const json = await r.json();
-    const text = await r.text();
-    status.textContent = 'Loaded...';
-
-    const games = document.getElementById('games');
-    games.innerHTML = '';
-    const pre = document.createElement('pre');
-    pre.textContent = text;
-    games.appendChild(pre);
-    // const data = await r.json();
-    // render(data.items || [], monday);
-    
+    const json = await r.json();
+    status.textContent = 'Loaded';
+    render(data.items || [], startOfWeek);
   } catch (e) {
     status.textContent = 'Error: ' + e.message;
   }
