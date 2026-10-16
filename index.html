@@ -46,12 +46,11 @@ function render(items, startOfWeek) {
     return;
   }
 
-games.innerHTML = items.map(match => `
-    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
-      <div><strong>Datum:</strong> ${match.date.split('T')[0]} om ${match.startTime}</div>
-      <div><strong>Competitie:</strong> ${match.competition.name}</div>
-      <div><strong>Teams:</strong> ${match.homeTeamName} vs ${match.awayTeamName}</div>
-      <div><strong>Locatie:</strong> ${match.accommodationName} (${match.fieldName})</div>
+  games.innerHTML = items.map(match => `
+    <div style="border: 1px solid #ddd; padding: 12px; margin-bottom: 10px; border-radius: 6px; font-family: system-ui, sans-serif;">
+      <div><strong>Datum:</strong> ${match.date ? match.date.split('T')[0] : ''} &nbsp;|&nbsp; <strong>Tijd:</strong> ${match.startTime || ''} &nbsp;|&nbsp; <strong>Status:</strong> ${match.status || ''}</div>
+      <div><strong>Thuis:</strong> ${match.homeOrganisation?.name || ''} (${match.homeTeamName || ''})</div>
+      <div><strong>Uit:</strong> ${match.awayOrganisation?.name || ''} (${match.awayTeamName || ''})</div>
     </div>
   `).join('');
 }
