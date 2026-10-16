@@ -103,17 +103,23 @@ async function renderCanvas(canvas, games, date) {
   let rowY = 200;
 
   const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  bgGradient.addColorStop(0, '#201b40');
-  bgGradient.addColorStop(1, '#0f0e28');
+  bgGradient.addColorStop(0, '#202040');
+  bgGradient.addColorStop(1, '#101020');
   ctx.fillStyle = bgGradient;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const redGlow = ctx.createRadialGradient(canvas.width, canvas.height, 0, canvas.width, canvas.height, canvas.width);
-  redGlow.addColorStop(0, 'rgba(255, 0, 0, 0.4)');
+  const redGlow = ctx.createRadialGradient(canvas.width, 0, 0, canvas.width, 0, canvas.width * 0.75);
+  redGlow.addColorStop(0, 'rgba(255, 0, 0, 0.2)');
   redGlow.addColorStop(1, 'rgba(255, 0, 0, 0)');
   ctx.fillStyle = redGlow;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  const whiteGlow = ctx.createRadialGradient(0, canvas.height, 0, 0, canvas.height, canvas.width * 0.75);
+  whiteGlow.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+  whiteGlow.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  ctx.fillStyle = whiteGlow;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
   const day = date.toLocaleDateString('nl-NL', { weekday: 'long' });
   ctx.fillStyle = '#ffffff';
   ctx.font = '128px "Bebas Neue", sans-serif';
