@@ -213,7 +213,7 @@ async function load() {
     if (!r.ok) throw new Error('HTTP ' + r.status);
 
     const json = await r.json();
-    // console.table(json.items);
+    console.table(json.items);
     startOfWeek.setDate(startOfWeek.getDate() + 14)
     renderWeekend(json.items || [], startOfWeek);
   } catch (e) {
