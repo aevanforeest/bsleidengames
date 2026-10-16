@@ -1,24 +1,114 @@
 <!DOCTYPE html>
-<html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BS Leiden Games</title>
+<style>
+</style>
+</head>
 <body>
+<main>
+  <p id="status"></p>
+  <div id="games"></div>
+</main>
+
 <script>
-const URL_ = 'https://api.foys.io/competition/public-api/v1/matches'
-  + '?startDate=2026-09-01&skipCoubt=0&maxResultCount=1000'
-  + '&organisationId=7888965c-ba38-4acc-ac15-d6f064014b8b'
-  + '&sorting=date+asc,+startTime+asc';
+const ORG_ID = '7888965c-ba38-4acc-ac15-d6f064014b8b';
+const FED_ID = '52cfa65e-9782-4a81-ab35-e2f981fcb7a9';
+
+function getMonday() {
+  const date = new Date();
+  const day = date.getDay();
+  const diff = (day === 0 ? 6 : day - 1);  
+  date.setDate(date.getDate() - diff);
+  return date;
+}
+
+function formatDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const dayOfMonth = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${dayOfMonth}`;
+}
+
+function getUrl(startDate) {
+  return 'https://api.foys.io/competition/public-api/v1/matches'
+    + '?startDate=' + formatDate(startDate)
+    + '&skipCount=0&maxResultCount=30'
+    + '&organisationId=' + ORG_ID
+    + '&sorting=date+asc,+startTime+asc';
+}
+
+function gameRow(m) {
+  const cancelled = m.status === 'Cancelled';
+  const li = el('li', 'game' + (cancelled ? ' is-cancelled' : ''));
+  li.append(el('div', 'time', (m.startTime || '').slice(0, 5) || '–'));
+  li.append(teamBlock('home', m.homeOrganisation && m.homeOrganisation.name, m.homeTeamName, m.homeLogoUrl));
+  li.append(teamBlock('away', m.awayOrganisation && m.awayOrganisation.name, m.awayTeamName, m.awayLogoUrl));
+
+  const meta = el('div', 'meta');
+  const bits = [];
+  if (cancelled) {
+    const c = el('span', 'cancelled', 'Afgelast');
+    bits.push(c);
+  } else if (m.homeScore != null && m.awayScore != null) {
+    bits.push(el('span', 'score', m.homeScore + ' – ' + m.awayScore));
+  }
+  const place = m.accommodationName || (m.accommodation && m.accommodation.name);
+  if (place) bits.push(document.createTextNode(place));
+  bits.forEach((b, i) => {
+    if (i) meta.append(document.createTextNode(' · '));
+    meta.append(b);
+  });
+  if (bits.length) li.append(meta);
+  return li;
+}
+
+function render(items, startDate) {
+  const status = document.getElementById('status');
+  const container = document.getElementById('games');
+  container.replaceChildren();
+
+  const days = [weekend.saturday, weekend.sunday];
+  const games = items
+    .filter(m => days.includes((m.date || '').slice(0, 10)))
+    .sort((a, b) =>
+      (a.date || '').localeCompare(b.date || '') ||
+      (a.startTime || '').localeCompare(b.startTime || ''));
+
+  if (!games.length) {
+    status.textContent = 'Geen wedstrijden gevonden dit weekend.';
+    return;
+  }
+  status.textContent = '';
+
+  for (const day of days) {
+    const dayGames = games.filter(m => m.date.slice(0, 10) === day);
+    if (!dayGames.length) continue;
+    container.append(el('h2', null, formatDay(day)));
+    const ul = el('ul');
+    dayGames.forEach(m => ul.append(gameRow(m)));
+    container.append(ul);
+  }
+}
 
 async function load() {
   const status = document.getElementById('status');
+  const monday = getMonday()
+  status.textContent = 'Loading...';
   try {
-    const r = await fetch(URL_, {
-      headers: { 'X-FederationId': '52cfa65e-9782-4a81-ab35-e2f981fcb7a9' }
+    const r = await fetch(getUrl(monday), {
+      headers: { 'X-FederationId': FED_ID }
     });
-    const data = await r.json();
-    const pre = document.createElement('pre');
-    pre.textContent = JSON.stringify(data, null, 2);
-    document.body.replaceChildren(pre);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const games = document.getElementById('games');
+    games.textContent = r.text()
+    // const data = await r.json();
+    // render(data.items || [], monday);
+    
   } catch (e) {
-    alert("ERROR");
+    status.textContent = 'Error: ' + e.message;
   }
 }
 load();
