@@ -93,6 +93,34 @@ async function renderCanvas(canvas, games, date) {
 
   await document.fonts.load('32px "Bebas Neue"');
 
+  const IMG_WIDTH = 80;
+  const IMG_HEIGHT = 80;
+
+  const ROW_WIDTH = 960;
+  const ROW_HEIGHT = 110;
+
+  const rowX = (canvas.width - ROW_WIDTH) / 2;
+  let rowY = 200;
+
+  const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  bgGradient.addColorStop(0, '#201b40');
+  bgGradient.addColorStop(1, '#0f0e28');
+  ctx.fillStyle = bgGradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const redGlow = ctx.createRadialGradient(canvas.width, canvas.height, 0, canvas.width, canvas.height, canvas.width);
+  redGlow.addColorStop(0, 'rgba(255, 0, 0, 0.4)');
+  redGlow.addColorStop(1, 'rgba(255, 0, 0, 0)');
+  ctx.fillStyle = redGlow;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const day = date.toLocaleDateString('nl-NL', { weekday: 'long' });
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '128px "Bebas Neue", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(day, canvas.width / 2, rowY / 2 + 16);
+
   if (games.length === 0) {
     ctx.fillStyle = '#212529';
     ctx.font = '48px "Bebas Neue", sans-serif';
@@ -101,28 +129,12 @@ async function renderCanvas(canvas, games, date) {
     return;
   }
 
-  const imgWidth = 80;
-  const imgHeight = 80;
-
-  const rowWidth = 960;
-  const rowHeight = 110;
-
-  const rowX = (canvas.width - rowWidth) / 2;
-  let rowY = 200;
-
-  const day = date.toLocaleDateString('nl-NL', { weekday: 'long' });
-  ctx.fillStyle = '#212529';
-  ctx.font = '128px "Bebas Neue", sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(day, canvas.width / 2, rowY / 2 + 16);
-
   for (const game of games) {
     const homeLogo = await loadImage(game.homeLogoUrl);
     const awayLogo = await loadImage(game.awayLogoUrl);
 
     ctx.beginPath();
-    ctx.roundRect(rowX, rowY, rowWidth, rowHeight, 12);
+    ctx.roundRect(rowX, rowY, ROW_WIDTH, ROW_HEIGHT, 12);
 
     ctx.fillStyle = '#ffffff';
     ctx.shadowBlur = 10;
@@ -135,41 +147,41 @@ async function renderCanvas(canvas, games, date) {
     ctx.shadowOffsetY = 0;
 
     if (homeLogo) {
-      drawScaledImage(ctx, homeLogo, rowX + 16, rowY + (rowHeight - imgHeight) / 2, imgWidth, imgHeight);
+      drawScaledImage(ctx, homeLogo, rowX + 16, rowY + (ROW_HEIGHT - IMG_HEIGHT) / 2, IMG_WIDTH, IMG_HEIGHT);
     }
     ctx.fillStyle = '#212529';
     ctx.font = '32px "Bebas Neue", sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'bottom';
-    fillTruncatedText(ctx, game.homeOrganisation?.name || '', rowX + 16 + imgWidth + 16, rowY + rowHeight / 2, rowWidth / 3 - imgWidth);
+    fillTruncatedText(ctx, game.homeOrganisation?.name || '', rowX + 16 + IMG_WIDTH + 16, rowY + ROW_HEIGHT / 2, ROW_WIDTH / 3 - IMG_WIDTH);
     ctx.font = '32px "Bebas Neue", sans-serif';
     ctx.textBaseline = 'top';
-    fillTruncatedText(ctx, game.homeTeamName || '', rowX + 16 + imgWidth + 16, rowY + rowHeight / 2, rowWidth / 3 - imgWidth);
+    fillTruncatedText(ctx, game.homeTeamName || '', rowX + 16 + IMG_WIDTH + 16, rowY + ROW_HEIGHT / 2, ROW_WIDTH / 3 - IMG_WIDTH);
 
     const timeStr = game.startTime ? game.startTime.substring(0, 5) : '';
     ctx.fillStyle = '#212529';
     ctx.font = '64px "Bebas Neue", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(timeStr, canvas.width / 2, rowY + rowHeight / 2);
+    ctx.fillText(timeStr, canvas.width / 2, rowY + ROW_HEIGHT / 2);
     ctx.fillStyle = '#495057';
     ctx.font = '600 16px system-ui, sans-serif';
     ctx.textBaseLine = 'bottom';
-    ctx.fillText(game.accommodationName.toUpperCase() || '', canvas.width / 2, rowY + rowHeight - 16);
+    ctx.fillText(game.accommodationName.toUpperCase() || '', canvas.width / 2, rowY + ROW_HEIGHT - 16);
 
     if (awayLogo) {
-      drawScaledImage(ctx, awayLogo, rowX + rowWidth - imgWidth - 16, rowY + (rowHeight - imgHeight) / 2, imgWidth, imgHeight);
+      drawScaledImage(ctx, awayLogo, rowX + ROW_WIDTH - IMG_WIDTH - 16, rowY + (ROW_HEIGHT - IMG_HEIGHT) / 2, IMG_WIDTH, IMG_HEIGHT);
     }
     ctx.fillStyle = '#212529';
     ctx.font = '32px "Bebas Neue", sans-serif';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'bottom';
-    fillTruncatedText(ctx, game.awayOrganisation?.name || '', rowX + rowWidth - 16 - imgWidth - 16, rowY + rowHeight / 2, rowWidth / 3 - imgWidth);
+    fillTruncatedText(ctx, game.awayOrganisation?.name || '', rowX + ROW_WIDTH - 16 - IMG_WIDTH - 16, rowY + ROW_HEIGHT / 2, ROW_WIDTH / 3 - IMG_WIDTH);
     ctx.font = '32px "Bebas Neue", sans-serif';
     ctx.textBaseline = 'top';
-    fillTruncatedText(ctx, game.awayTeamName || '', rowX + rowWidth - 16 - imgWidth - 16, rowY + rowHeight / 2, rowWidth / 3 - imgWidth);
+    fillTruncatedText(ctx, game.awayTeamName || '', rowX + ROW_WIDTH - 16 - IMG_WIDTH - 16, rowY + ROW_HEIGHT / 2, ROW_WIDTH / 3 - IMG_WIDTH);
 
-    rowY += rowHeight + 20;
+    rowY += ROW_HEIGHT + 20;
   }
 }
 
