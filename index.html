@@ -179,10 +179,9 @@ async function renderCanvas(canvas, games, date) {
     ctx.fillStyle = '#202040';
     ctx.textAlign = 'right';
     ctx.font = '48px "Bebas Neue", sans-serif';
-    ctx.textBaseline = 'bottom';
-    fillTruncatedText(ctx, game.awayOrganisation?.name || '', ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY, rowTop + ROW_HEIGHT / 2, COL_AWAY);
-    ctx.textBaseline = 'top';
-    fillTruncatedText(ctx, game.awayTeamName.replaceAll('*', '') || '', ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY, rowTop + ROW_HEIGHT / 2, COL_AWAY);
+    ctx.textBaseline = 'middle';
+    fillTruncatedText(ctx, game.awayOrganisation?.name || '', ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY, rowTop + ROW_HEIGHT * 1/4 + COL_PADDING / 2, COL_AWAY);
+    fillTruncatedText(ctx, game.awayTeamName.replaceAll('*', '') || '', ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY, rowTop + ROW_HEIGHT * 3/4 - COL_PADDING / 2, COL_AWAY);
 
     if (awayLogo) {
       drawScaledImage(ctx, awayLogo, ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY + COL_PADDING, rowTop + (ROW_HEIGHT - IMG_HEIGHT) / 2, IMG_WIDTH, IMG_HEIGHT);
