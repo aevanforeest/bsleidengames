@@ -51,6 +51,7 @@ function formatDate(date) {
 function getUrl(startDate) {
   return 'https://api.foys.io/competition/public-api/v1/matches'
     + '?startDate=' + formatDate(startDate)
+    + '&skipCount=0&maxResultCount=300'
     + '&organisationId=' + ORG_ID
     + '&sorting=date+asc,+startTime+asc';
 }
@@ -205,6 +206,7 @@ async function renderWeekend(games, startOfWeek) {
 
 async function load() {
   const startOfWeek = getStartOfWeek()
+  startOfWeek.setDate(startOfWeek.getDate() + 14)
 
   try {
     const r = await fetch(getUrl(startOfWeek), {
@@ -214,7 +216,6 @@ async function load() {
 
     const json = await r.json();
     console.table(json.items);
-    startOfWeek.setDate(startOfWeek.getDate() + 14)
     renderWeekend(json.items || [], startOfWeek);
   } catch (e) {
     alert('Error: ' + e.message);
