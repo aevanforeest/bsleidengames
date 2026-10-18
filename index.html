@@ -6,247 +6,270 @@
 <title>BS Leiden Games</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
 <style>
-  body {
+body {
     font-family: system-ui, sans-serif;
     color: #212529;
     background-color: #f8f9fa;
     margin: 0;
     padding: 2rem;
-  }
-  select {
+}
+select {
     margin: 1.5rem;
     padding: 8px 12px;
     font-size: 15px;
     border-radius: 6px;
     border: 1px solid #ced4da;
-  }
-  canvas {
+}
+canvas {
     max-width: 100%;
     height: auto;
     -webkit-touch-callout: default;
-  }
+}
 </style>
 </head>
 <body>
-  <select id="startOfWeek"></select>
-  <div id="container">
-  </div>
+    <select id="startOfWeek"></select>
+    <div id="container">
+    </div>
 <script>
 const ORG_ID = '7888965c-ba38-4acc-ac15-d6f064014b8b';
 const FED_ID = '52cfa65e-9782-4a81-ab35-e2f981fcb7a9';
 
 function getStartOfWeek() {
-  const date = new Date();
-  const day = date.getDay();
-  const diff = (day === 0 ? 6 : day - 1);  
-  date.setDate(date.getDate() - diff);
-  return date;
+    const date = new Date();
+    const day = date.getDay();
+    const diff = (day === 0 ? 6 : day - 1);
+    date.setDate(date.getDate() - diff);
+    return date;
 }
   
 function formatDate(date) {
-  const year = String(date.getFullYear());
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const dayOfMonth = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${dayOfMonth}`;
+    const year = String(date.getFullYear());
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const dayOfMonth = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${dayOfMonth}`;
 }
 
 function getUrl(startDate) {
-  return 'https://api.foys.io/competition/public-api/v1/matches'
-    + '?startDate=' + formatDate(startDate)
-    + '&skipCount=0&maxResultCount=300'
-    + '&organisationId=' + ORG_ID
-    + '&sorting=date+asc,+startTime+asc';
+    return 'https://api.foys.io/competition/public-api/v1/matches'
+        + '?startDate=' + formatDate(startDate)
+        + '&skipCount=0&maxResultCount=300'
+        + '&organisationId=' + ORG_ID
+        + '&sorting=date+asc,+startTime+asc';
 }
 
 function loadImage(url) {
-  return new Promise((resolve) => {
-    if (!url) { resolve(null); return; }
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
-    img.src = url;
-  });
+    return new Promise((resolve) => {
+        if (!url) { resolve(null); return; }
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = url;
+    });
+}
+
+function loadProxiedImage(url) {
+    return new Promise((resolve) => {
+        if (!url) { resolve(null); return; }
+        const proxyUrl = 'https://proxy.a-e-vanforeest.workers.dev/?url=' + encodeURIComponent(url);
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = proxyUrl;
+    });
 }
 
 function drawScaledImage(ctx, img, x, y, maxWidth, maxHeight) {
-  const ratio = Math.min(maxWidth / img.naturalWidth, maxHeight / img.naturalHeight);
-  const w = img.naturalWidth * ratio;
-  const h = img.naturalHeight * ratio;
-  const offsetX = x + (maxWidth - w) / 2;
-  const offsetY = y + (maxHeight - h) / 2;
-  ctx.drawImage(img, offsetX, offsetY, w, h);
+    const ratio = Math.min(maxWidth / img.naturalWidth, maxHeight / img.naturalHeight);
+    const w = img.naturalWidth * ratio;
+    const h = img.naturalHeight * ratio;
+    const offsetX = x + (maxWidth - w) / 2;
+    const offsetY = y + (maxHeight - h) / 2;
+    ctx.drawImage(img, offsetX, offsetY, w, h);
 }
 
-function fillTruncatedText(ctx, text, x, y, maxWidth) {
-  if (ctx.measureText(text).width <= maxWidth) {
-    ctx.fillText(text, x, y)
-    return;
-  }
+async function renderCanvas(canvas, page) {
+    const ctx = canvas.getContext('2d');
 
-  let truncatedText = text;
-  while (truncatedText.length > 0 && ctx.measureText(truncatedText + '...').width > maxWidth) {
-    truncatedText = truncatedText.slice(0, -1);
-  }
-  ctx.fillText(truncatedText + '...', x, y);
-}
+    await document.fonts.load('128px "Bebas Neue"');
 
-async function renderCanvas(canvas, games, date) {
-  const ctx = canvas.getContext('2d');
+    const IMG_WIDTH = 80;
+    const IMG_HEIGHT = 80;
 
-  await document.fonts.load('128px "Bebas Neue"');
+    const ROW_WIDTH = 960;
+    const ROW_HEIGHT = 120;
 
-  const IMG_WIDTH = 80;
-  const IMG_HEIGHT = 80;
+    const ROW_LEFT = (canvas.width - ROW_WIDTH) / 2;
+    const ROW_RIGHT = ROW_LEFT + ROW_WIDTH;
 
-  const ROW_WIDTH = 960;
-  const ROW_HEIGHT = 120;
+    let rowTop = 200;
 
-  const ROW_LEFT = (canvas.width - ROW_WIDTH) / 2;
-  const ROW_RIGHT = ROW_LEFT + ROW_WIDTH;
+    const bgImage = await loadImage('bsleidengames.png');
+    if (bgImage) {
+        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+    }
 
-  let rowTop = 200;
-  
-  const bgImage = await loadImage('bsleidengames.png');
-  if (bgImage) {
-      ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-  } else {
-      const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      bgGradient.addColorStop(0, '#131d62');
-      bgGradient.addColorStop(1, '#000051');
-      ctx.fillStyle = bgGradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-
-  const day = date.toLocaleDateString('nl-NL', { weekday: 'long' });
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '128px "Bebas Neue", sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(day, canvas.width / 2, rowTop / 2);
-
-  if (games.length == 0) {
+    // const day = date.toLocaleDateString('nl-NL', { weekday: 'long' });
     ctx.fillStyle = '#ffffff';
-    ctx.font = '80px "Bebas Neue", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Geen wedstrijden', canvas.width / 2, canvas.height / 2);
-    return;
-  }
-
-  for (const game of games) {
-    // const homeLogo = await loadImage(game.homeLogoUrl);
-    const awayLogo = await loadImage(game.awayLogoUrl);
-
-    ctx.beginPath();
-    ctx.roundRect(ROW_LEFT, rowTop, ROW_WIDTH, ROW_HEIGHT, 12);
-
-    ctx.fillStyle = '#ffffff';
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
-    ctx.shadowOffsetY = 4;
-    ctx.fill()
-    ctx.shadowBlur = 0;
-    ctx.shadowColor = 'transparent';
-    ctx.shadowOffsetY = 0;
-  
-    ctx.font = '80px "Bebas Neue", sans-serif';
-    const COL_PADDING = 15
-    const COL_LOGO = COL_PADDING + IMG_WIDTH + COL_PADDING;
-    const COL_HOME = COL_PADDING + ctx.measureText("XXX-88").width + COL_PADDING;
-    const COL_TIME = COL_PADDING + ctx.measureText("88:88").width + COL_PADDING;
-    const COL_AWAY = (ROW_WIDTH - COL_TIME - COL_HOME - COL_LOGO);
-
-    const time = game.startTime ? game.startTime.substring(0, 5) : '';
-    ctx.fillStyle = '#802020';
+    ctx.font = '128px "Bebas Neue", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = '80px "Bebas Neue", sans-serif';
-    ctx.fillText(time, ROW_LEFT + COL_TIME / 2, rowTop + ROW_HEIGHT / 2);
+    ctx.fillText("BS LEIDEN", canvas.width / 2, rowTop / 2);
 
-    ctx.fillStyle = '#202040';
-    ctx.textAlign = 'left';
-    ctx.font = '80px "Bebas Neue", sans-serif';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(game.homeTeamName.replaceAll('*', '') || '', ROW_LEFT + COL_TIME + COL_PADDING, rowTop + ROW_HEIGHT / 2);
+    if (page.length == 0) {
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '80px "Bebas Neue", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Geen wedstrijden', canvas.width / 2, canvas.height / 2);
+      return;
+    }
 
-    // ctx.font = '600 16px system-ui, sans-serif';
-    // ctx.textBaseLine = 'bottom';
-    // ctx.fillText(game.accommodationName.toUpperCase() || '', canvas.width / 2, rowY + ROW_HEIGHT - 20);
+    for (const item of page) {
+        if (item.type == 'header') {
+            const date = new Date(item.date);
+            const day = date.toLocaleDateString('nl-NL', { weekday: 'long' }).toUpperCase();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '80px "Bebas Neue", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(day, canvas.width / 2, rowTop + ROW_HEIGHT / 2);
+        } else if (item.type == 'game') {
+            const game = item.game;
 
-    ctx.fillStyle = '#202040';
-    ctx.textAlign = 'right';
-    ctx.font = '50px "Bebas Neue", sans-serif';
-    ctx.textBaseline = 'middle';
+            ctx.beginPath();
+            ctx.roundRect(ROW_LEFT, rowTop, ROW_WIDTH, ROW_HEIGHT, 12);
 
-    let i = 0;
-    let words = (game.awayOrganisation?.name || '').split(' ');
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
+            ctx.shadowOffsetY = 4;
+            ctx.fill()
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+            ctx.shadowOffsetY = 0;
+          
+            ctx.font = '80px "Bebas Neue", sans-serif';
+            const COL_PADDING = 15
+            const COL_LOGO = COL_PADDING + IMG_WIDTH + COL_PADDING;
+            const COL_HOME = COL_PADDING + ctx.measureText("XXX-88").width + COL_PADDING;
+            const COL_TIME = COL_PADDING + ctx.measureText("88:88").width + COL_PADDING;
+            const COL_AWAY = (ROW_WIDTH - COL_TIME - COL_HOME - COL_LOGO);
 
-    let line1 = '';
-    while (i < words.length) {
-        text = words.slice(0, i + 1).join(' ');
-        if (ctx.measureText(text).width <= COL_AWAY) {
-            line1 = text;
-            i++;
-        } else {
-            break;
+            const time = game.startTime ? game.startTime.substring(0, 5) : '';
+            ctx.fillStyle = '#802020';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = '80px "Bebas Neue", sans-serif';
+            ctx.fillText(time, ROW_LEFT + COL_TIME / 2, rowTop + ROW_HEIGHT / 2);
+
+            ctx.fillStyle = '#202040';
+            ctx.textAlign = 'left';
+            ctx.font = '80px "Bebas Neue", sans-serif';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(game.homeTeamName.replaceAll('*', '') || '', ROW_LEFT + COL_TIME + COL_PADDING, rowTop + ROW_HEIGHT / 2);
+
+            // ctx.font = '600 16px system-ui, sans-serif';
+            // ctx.textBaseLine = 'bottom';
+            // ctx.fillText(game.accommodationName.toUpperCase() || '', canvas.width / 2, rowY + ROW_HEIGHT - 20);
+
+            ctx.fillStyle = '#202040';
+            ctx.textAlign = 'right';
+            ctx.font = '50px "Bebas Neue", sans-serif';
+            ctx.textBaseline = 'middle';
+
+            let i = 0;
+            let words = (game.awayOrganisation?.name || '').split(' ');
+
+            let line1 = '';
+            while (i < words.length) {
+                text = words.slice(0, i + 1).join(' ');
+                if (ctx.measureText(text).width <= COL_AWAY) {
+                    line1 = text;
+                    i++;
+                } else {
+                    break;
+                }
+            }
+
+            let line2 = words.slice(i).join(' ');
+            const awayTeamName = game.awayTeamName.replace('*', '') || '';
+            if (ctx.measureText(line2 + ' ' + awayTeamName).width > COL_AWAY) {
+                while (ctx.measureText(line2 + '... ' + awayTeamName).width > COL_AWAY) {
+                    line2 = line2.slice(0, -1);
+                }
+                line2 += '...';
+            }
+            line2 += ' ' + awayTeamName;
+            
+            ctx.fillText(line1, ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY, rowTop + ROW_HEIGHT * 1/4 + COL_PADDING / 2);
+            ctx.fillText(line2, ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY, rowTop + ROW_HEIGHT * 3/4 - COL_PADDING / 2);
+
+            ctx.fillStyle = '#8080a0';
+            ctx.fillText(awayTeamName, ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY, rowTop + ROW_HEIGHT * 3/4 - COL_PADDING / 2);
+         
+            const awayLogo = await loadProxiedImage(game.awayLogoUrl);
+            if (awayLogo) {
+              drawScaledImage(ctx, awayLogo, ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY + COL_PADDING, rowTop + (ROW_HEIGHT - IMG_HEIGHT) / 2, IMG_WIDTH, IMG_HEIGHT);
+            }
         }
+        rowTop += ROW_HEIGHT + 20;
     }
-
-    let line2 = words.slice(i).join(' ');
-    const awayTeamName = game.awayTeamName.replace('*', '') || '';
-    if (ctx.measureText(line2 + ' ' + awayTeamName).width > COL_AWAY) {
-        while (ctx.measureText(line2 + '... ' + awayTeamName).width > COL_AWAY) {
-            line2 = line2.slice(0, -1);
-        }
-        line2 += '...';
-    }
-    line2 += ' ' + awayTeamName;
-    
-    ctx.fillText(line1, ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY, rowTop + ROW_HEIGHT * 1/4 + COL_PADDING / 2);
-    ctx.fillText(line2, ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY, rowTop + ROW_HEIGHT * 3/4 - COL_PADDING / 2);
-
-    ctx.fillStyle = '#8080a0';
-    ctx.fillText(awayTeamName, ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY, rowTop + ROW_HEIGHT * 3/4 - COL_PADDING / 2);
- 
-    if (awayLogo) {
-      drawScaledImage(ctx, awayLogo, ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY + COL_PADDING, rowTop + (ROW_HEIGHT - IMG_HEIGHT) / 2, IMG_WIDTH, IMG_HEIGHT);
-    }
-
-    rowTop += ROW_HEIGHT + 20;
-  }
-}
-
-async function renderDay(games, day) {
-  const div = document.getElementById('container');
-  const homeGames = games.filter(m => m.date.startsWith(formatDate(day)) && m.homeOrganisation?.id == ORG_ID)
-
-  const GAMES_PER_PAGE = 8;
-  for (let i = 0; i < homeGames.length; i += GAMES_PER_PAGE) {
-    const pageGames = homeGames.slice(i, i + GAMES_PER_PAGE);
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 1080;
-    canvas.height = 1350;
-    div.appendChild(canvas);
-    renderCanvas(canvas, pageGames, day);
-  }
 }
 
 async function renderWeekend(games, startOfWeek) {
-  const excludedProGames = games.filter(m => m.competition.id != 5809 && m.competition.id != 5811);
 
-  const friday = new Date(startOfWeek);
-  friday.setDate(friday.getDate() + 4);
-  renderDay(excludedProGames, friday);
+    const friday = new Date(startOfWeek);
+    friday.setDate(friday.getDate() + 4);
 
-  const saturday = new Date(startOfWeek);
-  saturday.setDate(saturday.getDate() + 5);
-  renderDay(excludedProGames, saturday);
+    const saturday = new Date(startOfWeek);
+    saturday.setDate(saturday.getDate() + 5);
 
-  const sunday = new Date(startOfWeek);
-  sunday.setDate(sunday.getDate() + 6);
-  renderDay(excludedProGames, sunday);
+    const sunday = new Date(startOfWeek);
+    sunday.setDate(sunday.getDate() + 6);
+
+    const filteredGames = games.filter(m => m.competition.id != 5809 && m.competition.id != 5811 && m.homeOrganisation?.id == ORG_ID &&
+       (m.date.startsWith(formatDate(friday)) || m.date.startsWith(formatDate(saturday)) || m.date.startsWith(formatDate(sunday))));
+
+    let pages = [];
+    let page = [];
+
+    for (const game of filteredGames) {
+        if (page.length == 0) {
+            page.push({ type: 'header', date: game.date });
+        } else {
+            if (page.at(-1).type == 'game' && page.at(-1).game.date.slice(0, 10) != game.date.slice(0, 10)) {
+                if (page.length > 6) {
+                    pages.push(page);
+                    page = [];
+                }
+                page.push({ type: 'header', date: game.date });
+            }
+        }
+        page.push({ type: 'game', game: game });
+        if (page.length == 8) {
+            pages.push(page);
+            page = [];
+        }
+    }
+    
+    if (page.length > 0) {
+        pages.push(page);
+    }
+
+    const div = document.getElementById('container');
+
+    for (const page of pages) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1080;
+      canvas.height = 1350;
+      div.appendChild(canvas);
+      console.log('renderCanvas' + page);
+      renderCanvas(canvas, page);
+    }
 }
-
+    
 async function refresh(startOfWeek) {
   try {
     const r = await fetch(getUrl(startOfWeek), {
