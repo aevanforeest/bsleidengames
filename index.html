@@ -58,16 +58,17 @@ function getUrl(startDate) {
         + '&sorting=date+asc,+startTime+asc';
 }
 
-function loadImage(url) {
+function loadImage(url, proxy = false) {
     return new Promise((resolve) => {
         if (!url) { resolve(null); return; }
         const proxyUrl = 'https://proxy.a-e-vanforeest.workers.dev/?url=' + encodeURIComponent(url);
         const img = new Image();
-        //  img.crossOrigin = 'anonymous';
+        if (proxy) {
+            img.crossOrigin = 'anonymous';
+        }
         img.onload = () => resolve(img);
         img.onerror = () => resolve(null);
-        // img.src = proxyUrl;
-        img.src = url;
+        img.src = proxy ? proxyUrl : url;
     });
 }
 
@@ -96,7 +97,7 @@ async function renderCanvas(canvas, page) {
 
     let rowTop = 200;
 
-    const bgImage = await loadImage('bsleidengames.png');
+    const bgImage = await loadImage('https://aevanforeest.github.io/bsleidengames/bsleidengames.png', true);
     if (bgImage) {
         ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
     }
@@ -200,7 +201,7 @@ async function renderCanvas(canvas, page) {
             ctx.fillStyle = '#8080a0';
             ctx.fillText(awayTeamName, ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY, rowTop + ROW_HEIGHT * 3/4 - COL_PADDING / 2);
          
-            const awayLogo = await loadImage(game.awayLogoUrl);
+            const awayLogo = await loadImage(game.awayLogoUrl, true);
             if (awayLogo) {
               drawScaledImage(ctx, awayLogo, ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY + COL_PADDING, rowTop + (ROW_HEIGHT - IMG_HEIGHT) / 2, IMG_WIDTH, IMG_HEIGHT);
             }
@@ -252,12 +253,16 @@ async function renderWeekend(games, startOfWeek) {
     const div = document.getElementById('container');
 
     for (const page of pages) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 1080;
-      canvas.height = 1350;
-      div.appendChild(canvas);
-      console.log('renderCanvas' + page);
-      renderCanvas(canvas, page);
+        const canvas = document.createElement('canvas');
+        canvas.width = 1080;
+        canvas.height = 1350;
+        div.appendChild(canvas);
+        console.log('renderCanvas' + page);
+        await renderCanvas(canvas, page);
+
+        const img = document.createElement('img');
+        img.src = canvas.toDataURL('image/png');
+        canvas.replaceWith(img);
     }
 }
     
