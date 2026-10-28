@@ -35,6 +35,9 @@ canvas, img {
 const ORG_ID = '7888965c-ba38-4acc-ac15-d6f064014b8b';
 const FED_ID = '52cfa65e-9782-4a81-ab35-e2f981fcb7a9';
 
+const HK_ID = '4d2e09fb-aeeb-44ae-ba06-fe2f38c3d6b1';
+const KP_ID = 'c9164a46-eac1-4033-aca3-9f06c9f36340';
+
 function getStartOfWeek() {
     const date = new Date();
     const day = date.getDay();
@@ -156,6 +159,14 @@ async function renderCanvas(canvas, page) {
             ctx.textBaseline = 'middle';
             ctx.font = '80px "Bebas Neue", sans-serif';
             ctx.fillText(time, ROW_LEFT + COL_TIME / 2, rowTop + ROW_HEIGHT / 2);
+
+            if (game.accommodation?.id == KP_ID) {
+                ctx.fillStyle = '#802020';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.font = '25px "Bebas Neue", sans-serif';
+                ctx.fillText("KIKKERPOLDER", ROW_LEFT + COL_TIME / 2, rowTop + ROW_HEIGHT - COL_PADDING / 2);
+            }
 
             ctx.fillStyle = '#202040';
             ctx.textAlign = 'left';
