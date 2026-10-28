@@ -271,7 +271,6 @@ async function renderWeekend(games, startOfWeek) {
         canvas.width = 1080;
         canvas.height = 1350;
         div.appendChild(canvas);
-        console.log('renderCanvas' + page);
         await renderCanvas(canvas, page);
 
         const img = document.createElement('img');
