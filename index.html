@@ -222,7 +222,9 @@ async function renderWeekend(games, startOfWeek) {
     const sunday = new Date(startOfWeek);
     sunday.setDate(sunday.getDate() + 6);
 
-    const filteredGames = games.filter(m => m.competition.id != 5809 && m.competition.id != 5811 && m.homeOrganisation?.id == ORG_ID &&
+    const filteredGames = games.filter(m => m.competition.id != 5809 && m.competition.id != 5811 &&
+        m.homeOrganisation?.id == ORG_ID &&
+        m.status != "Cancelled" &&
        (m.date.startsWith(formatDate(friday)) || m.date.startsWith(formatDate(saturday)) || m.date.startsWith(formatDate(sunday))));
 
     let pages = [];
