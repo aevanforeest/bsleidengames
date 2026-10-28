@@ -163,9 +163,9 @@ async function renderCanvas(canvas, page) {
             if (game.accommodation?.id == KP_ID) {
                 ctx.fillStyle = '#802020';
                 ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
+                ctx.textBaseline = 'middle';
                 ctx.font = '25px "Bebas Neue", sans-serif';
-                ctx.fillText("KIKKERPOLDER", ROW_LEFT + COL_TIME / 2, rowTop + ROW_HEIGHT - COL_PADDING / 2);
+                ctx.fillText("KIKKERPOLDER", ROW_LEFT + COL_TIME / 2, rowTop + ROW_HEIGHT - COL_PADDING);
             }
 
             ctx.fillStyle = '#202040';
