@@ -43,6 +43,7 @@ function getStartOfWeek() {
     const day = date.getDay();
     const diff = (day === 0 ? 6 : day - 1);
     date.setDate(date.getDate() - diff);
+    date.setHours(0, 0, 0, 0);
     return date;
 }
   
@@ -97,7 +98,6 @@ async function renderCanvas(canvas, page) {
     const ROW_HEIGHT = 120;
 
     const ROW_LEFT = (canvas.width - ROW_WIDTH) / 2;
-    const ROW_RIGHT = ROW_LEFT + ROW_WIDTH;
 
     let rowTop = 200;
 
@@ -188,7 +188,7 @@ async function renderCanvas(canvas, page) {
 
             let line1 = '';
             while (i < words.length) {
-                text = words.slice(0, i + 1).join(' ');
+                const text = words.slice(0, i + 1).join(' ');
                 if (ctx.measureText(text).width <= COL_AWAY) {
                     line1 = text;
                     i++;
@@ -198,15 +198,16 @@ async function renderCanvas(canvas, page) {
             }
 
             let line2 = words.slice(i).join(' ');
-            const awayTeamName = game.awayTeamName.replace('*', '') || '';
-            if (ctx.measureText(line2 + ' ' + awayTeamName).width > COL_AWAY) {
-                while (ctx.measureText(line2 + '... ' + awayTeamName).width > COL_AWAY) {
+            const awayTeamName = game.awayTeamName.replaceAll('*', '') || '';
+            const suffix = awayTeamName ? ' ' + awayTeamName : '';
+            if (ctx.measureText(line2 + suffix).width > COL_AWAY) {
+                while (line2.length > 0 && ctx.measureText(line2.trimEnd() + '...' + suffix).width > COL_AWAY) {
                     line2 = line2.slice(0, -1);
                 }
-                line2 += '...';
+                line2 = line2.length > 0 ? line2.trimEnd() + '...' : '';
             }
-            line2 += ' ' + awayTeamName;
-            
+            line2 += suffix;
+
             ctx.fillText(line1, ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY, rowTop + ROW_HEIGHT * 1/4 + COL_PADDING / 2);
             ctx.fillText(line2, ROW_LEFT + COL_TIME + COL_HOME + COL_AWAY, rowTop + ROW_HEIGHT * 3/4 - COL_PADDING / 2);
 
@@ -259,9 +260,13 @@ async function renderWeekend(games, startOfWeek) {
             page = [];
         }
     }
-    
+
     if (page.length > 0) {
         pages.push(page);
+    }
+
+    if (pages.length == 0) {
+        pages.push([]);
     }
 
     const div = document.getElementById('container');
@@ -287,7 +292,7 @@ async function refresh(startOfWeek) {
     if (!r.ok) throw new Error('HTTP ' + r.status);
 
     const json = await r.json();
-    renderWeekend(json.items || [], startOfWeek);
+    await renderWeekend(json.items || [], startOfWeek);
   } catch (e) {
     alert('Error: ' + e.message);
   }
@@ -295,7 +300,7 @@ async function refresh(startOfWeek) {
 
 const select = document.getElementById('startOfWeek');
 const startOfWeek = getStartOfWeek();
-for (i = 0; i < 4; i++) {
+for (let i = 0; i < 4; i++) {
   const date = new Date(startOfWeek);
   date.setDate(date.getDate() + (i * 7));
   const option = document.createElement('option');
