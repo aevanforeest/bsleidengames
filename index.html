@@ -285,34 +285,39 @@ async function renderWeekend(games, startOfWeek) {
 }
     
 async function refresh(startOfWeek) {
-  try {
-    const r = await fetch(getUrl(startOfWeek), {
-      headers: { 'X-FederationId': FED_ID }
-    });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
+    select.disabled = true;
+    try {
+        const r = await fetch(getUrl(startOfWeek), {
+            headers: { 'X-FederationId': FED_ID }
+        });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
 
-    const json = await r.json();
-    await renderWeekend(json.items || [], startOfWeek);
-  } catch (e) {
-    alert('Error: ' + e.message);
-  }
+        const json = await r.json();
+        await renderWeekend(json.items || [], startOfWeek);
+    } catch (e) {
+        alert('Error: ' + e.message);
+    } finally {
+        select.disabled = false;
+    }
 }
 
 const select = document.getElementById('startOfWeek');
 const startOfWeek = getStartOfWeek();
+
 for (let i = 0; i < 4; i++) {
-  const date = new Date(startOfWeek);
-  date.setDate(date.getDate() + (i * 7));
-  const option = document.createElement('option');
-  option.value = date.toISOString();
-  option.textContent = formatDate(date);
-  select.appendChild(option);
+    const date = new Date(startOfWeek);
+    date.setDate(date.getDate() + (i * 7));
+    const option = document.createElement('option');
+    option.value = date.toISOString();
+    option.textContent = formatDate(date);
+    select.appendChild(option);
 }
+
 select.onchange = (e) => {
-  const date = new Date(e.target.value);
-  const div = document.getElementById('container');
-  div.innerHTML = '';
-  refresh(date);
+    const date = new Date(e.target.value);
+    const div = document.getElementById('container');
+    div.innerHTML = '';
+    refresh(date);
 }
 refresh(startOfWeek);
 </script>
