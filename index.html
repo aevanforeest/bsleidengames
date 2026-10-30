@@ -86,6 +86,8 @@ function drawScaledImage(ctx, img, x, y, maxWidth, maxHeight) {
     ctx.drawImage(img, offsetX, offsetY, w, h);
 }
 
+let bgImage;
+
 async function renderCanvas(canvas, page) {
     const ctx = canvas.getContext('2d');
 
@@ -101,7 +103,9 @@ async function renderCanvas(canvas, page) {
 
     let rowTop = 200;
 
-    const bgImage = await loadImage('https://aevanforeest.github.io/bsleidengames/bsleidengames.png', true);
+    if (!bgImage) {
+        bgImage = await loadImage('https://aevanforeest.github.io/bsleidengames/bsleidengames.png', true);
+    }
     if (bgImage) {
         ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
     }
