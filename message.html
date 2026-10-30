@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BS Leiden Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
+<style>
+body {
+    font-family: system-ui, sans-serif;
+    color: #212529;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 2rem;
+}
+.form {
+    max-width: 100%;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+input, textarea {
+    padding: 8px 12px;
+    font-size: 15px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    box-sizing: border-box;
+    width: 100%;
+}
+textarea {
+    min-height: 160px;
+    resize: vertical;
+}
+canvas, img {
+    max-width: 100%;
+    height: auto;
+    -webkit-touch-callout: default;
+}
+</style>
+</head>
+<body>
+    <div class="form">
+        <input id="subject" type="text" placeholder="Onderwerp" />
+        <textarea id="message" placeholder="Bericht"></textarea>
+        <button id="button" type="button">Download</button>
+    </div>
+    <canvas id="canvas" width="1080" height="1350"></canvas>
+<script>
+function loadImage(url, proxy = false) {
+    return new Promise((resolve) => {
+        if (!url) { resolve(null); return; }
+        const proxyUrl = 'https://proxy.a-e-vanforeest.workers.dev/?url=' + encodeURIComponent(url);
+        const img = new Image();
+        if (proxy) {
+            img.crossOrigin = 'anonymous';
+        }
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = proxy ? proxyUrl : url;
+    });
+}
+
+function drawScaledImage(ctx, img, x, y, maxWidth, maxHeight) {
+    const ratio = Math.min(maxWidth / img.naturalWidth, maxHeight / img.naturalHeight);
+    const w = img.naturalWidth * ratio;
+    const h = img.naturalHeight * ratio;
+    const offsetX = x + (maxWidth - w) / 2;
+    const offsetY = y + (maxHeight - h) / 2;
+    ctx.drawImage(img, offsetX, offsetY, w, h);
+}
+
+let bgImage;
+
+async function renderCanvas(canvas, subject, message) {
+    const ctx = canvas.getContext('2d');
+
+    await document.fonts.load('128px "Bebas Neue"');
+
+    const IMG_WIDTH = 80;
+    const IMG_HEIGHT = 80;
+
+    const ROW_WIDTH = 960;
+    const ROW_HEIGHT = 120;
+
+    const ROW_LEFT = (canvas.width - ROW_WIDTH) / 2;
+
+    let rowTop = 200;
+
+    if (!bgImage) {
+        bgImage = await loadImage('https://aevanforeest.github.io/bsleidengames/bsleidengames.png', true);
+    }
+    if (bgImage) {
+        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+    }
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '128px "Bebas Neue", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText("BS LEIDEN", canvas.width / 2, rowTop / 2);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '80px "Bebas Neue", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(subject.value.trim().toUpperCase(), canvas.width / 2, rowTop + ROW_HEIGHT / 2);
+
+    rowTop += ROW_HEIGHT + 20;
+
+    ctx.fillStyle = '#202040';
+    ctx.font = '80px "Bebas Neue", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+
+    const COL_PADDING = 15
+    const LINE_HEIGHT = 64;
+
+    const lines = [];
+    const text = message.value.trim().toUpperCase();
+    const paragraphs = text ? text.split('\n') : [];
+    for (let paragraph of paragraphs) {
+        const words = paragraph.split(/\s+/).filter(Boolean);
+        if (words.length == 0) {
+            lines.push('');
+            continue;
+        }
+
+        let line = '';
+        for (const word of words) {
+            const test = line ? line + ' ' + word : word;
+            if (line && ctx.measureText(test).width > ROW_WIDTH - COL_PADDING * 2) {
+                lines.push(line);
+                line = word;
+            } else {
+                line = test;
+            }
+        }
+        lines.push(line);
+    }
+
+    if (lines.length > 0) {
+        ctx.beginPath();
+        ctx.roundRect(ROW_LEFT, rowTop, ROW_WIDTH, (LINE_HEIGHT + 20) * lines.length + 20, 12);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
+        ctx.shadowOffsetY = 4;
+        ctx.fill()
+        ctx.shadowBlur = 0;
+        ctx.shadowColor = 'transparent';
+        ctx.shadowOffsetY = 0;
+
+        ctx.fillStyle = '#202040';
+        ctx.font = '80px "Bebas Neue", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+
+        for (line of lines) {
+            ctx.fillText(line, ROW_LEFT + COL_PADDING, rowTop + ROW_HEIGHT / 2);
+            rowTop += LINE_HEIGHT + 20;
+        }
+    }
+}
+
+async function refresh() {
+    button.disabled = true;
+    try {
+        const canvas = document.getElementById('canvas');
+        await renderCanvas(canvas, subject, message);
+    } catch (e) {
+        alert('Error: ' + e.message);
+    } finally {
+        button.disabled = false;
+    }
+}
+
+const subject = document.getElementById('subject');
+const message = document.getElementById('message');
+const button = document.getElementById('button');
+
+subject.addEventListener('input', refresh);
+message.addEventListener('input', refresh);
+button.onclick = () => {
+    refresh();
+    canvas.toBlob((blob) => {
+        if (blob) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'bsleiden.png';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+    }, 'image/png');
+}
+
+refresh();
+</script>
+</body>
+</html>
